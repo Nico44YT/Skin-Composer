@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.beryx.jlink' version '2.25.0'
+}
+
+group = 'nazario'
+version = '1.0-SNAPSHOT'
+
+configurations {
+    antTask
+}
+
+repositories {
+    mavenCentral()
+
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+}
+
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation group: 'org.hihn', name: 'javampd', version: '6.2.5'
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
+
+    implementation("net.raphimc:MinecraftAuth:4.1.2")
+
+    implementation("org.fxyz3d:fxyz3d-client:0.6.0")
+    implementation("org.fxyz3d:fxyz3d-importers:0.6.0")
+
+
+    antTask 'com.jetbrains.intellij.java:java-compiler-ant-tasks:203.7148.30'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+javafx {
+    version = '20'
+    modules = [
+            'javafx.base',
+            'javafx.controls',
+            'javafx.fxml',
+            'javafx.graphics',
+            'javafx.swing'
+    ]
+}
+
+jlink {
+    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'FXGradle'
+    }
+}
+
+
+tasks.named('compileJava') {
+    doLast {
+        project.sourceSets.main.output.classesDirs.each { project.mkdir(it) }
+        ant.taskdef(
+                name: 'javac2',
+                classname: 'com.intellij.ant.Javac2',
+                classpath: configurations.antTask.asPath
+        )
+        ant.javac2(
+                srcdir: project.sourceSets.main.java.srcDirs.join(':'),
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                destdir: project.sourceSets.main.output.classesDirs[0],
+                source: sourceCompatibility,
+                target: targetCompatibility,
+                includeAntRuntime: false
+        )
+    }
+}
