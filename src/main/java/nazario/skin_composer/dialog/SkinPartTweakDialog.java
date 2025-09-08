@@ -15,6 +15,9 @@ public class SkinPartTweakDialog extends JDialog {
     private JSpinner yOffset;
     private JSlider brightnessFactorSlider;
     private JSlider opacifyFactorSlider;
+    private JSpinner spinner1;
+    private JSpinner spinner2;
+    private JSpinner spinner3;
 
     protected SkinPart tweakedPart;
 
@@ -65,6 +68,10 @@ public class SkinPartTweakDialog extends JDialog {
             this.tweakedPart.opacityFactor = opacifyFactorSlider.getValue()/100d;
 
             skinComposer.updateSkinViewer();
+        });
+
+        brightnessFactorSlider.addChangeListener(lis -> {
+            this.tweakedPart.brightnessFactor = brightnessFactorSlider.getValue()/100d;
         });
 
         this.pack();

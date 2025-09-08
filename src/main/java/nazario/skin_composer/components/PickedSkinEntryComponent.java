@@ -89,4 +89,8 @@ public class PickedSkinEntryComponent extends JPanel {
         update(composer);
         updateButtons(composer, newIndex);
     }
+
+    public SkinPart getSkinPart() {
+        return this.skinPart;
+    }
 }

@@ -132,20 +132,47 @@ public class SkinComposer extends JFrame {
         return skinPartComponent;
     }
 
-    public void updateSkinViewer() {
-        this.selectedPartsPanel.removeAll();
+    List<PickedSkinEntryComponent> PICKED_PARTS = new ArrayList<>();
+
+    public void smartUpdateSkinViewer() {
         this.selectedPartsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        this.selectedPartsPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.currentSkin.images.size() * 70));
+        for (int i = 0; i < PICKED_PARTS.size(); i++) {
+            PickedSkinEntryComponent part = PICKED_PARTS.get(i);
 
-        for (int i = 0; i < this.currentSkin.images.size(); i++) {
-            this.selectedPartsPanel.add(new PickedSkinEntryComponent(this, this.currentSkin.images.get(i), i, this.getWidth()/3 - 35));
+            boolean containsInCompoundSkin = this.currentSkin.images.contains(part.getSkinPart());
+            if(!containsInCompoundSkin) {
+                this.selectedPartsPanel.remove(part);
+            } else {
+                boolean containedInList = part.getParent() == this.selectedPartsPanel;
+                if(!containedInList) {
+                    this.selectedPartsPanel.add(new PickedSkinEntryComponent(this, part.getSkinPart(), i, this.getWidth()/3 - 35));
+                }
+            }
+
         }
 
         this.skinViewerComponent.updateTexture(this.currentSkin.toImage());
 
-
         repaint();
+    }
+
+    public void updateSkinViewer() {
+        //this.selectedPartsPanel.removeAll();
+        //this.selectedPartsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+//
+        //this.selectedPartsPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.currentSkin.images.size() * 70));
+//
+        //for (int i = 0; i < this.currentSkin.images.size(); i++) {
+        //    this.selectedPartsPanel.add(new PickedSkinEntryComponent(this, this.currentSkin.images.get(i), i, this.getWidth()/3 - 35));
+        //}
+//
+        //this.skinViewerComponent.updateTexture(this.currentSkin.toImage());
+//
+//
+        //repaint();
+
+        smartUpdateSkinViewer();
     }
 
     private void action$exportSkin(ActionEvent event) {
