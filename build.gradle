@@ -33,6 +33,7 @@ dependencies {
     implementation("org.fxyz3d:fxyz3d-client:0.6.0")
     implementation("org.fxyz3d:fxyz3d-importers:0.6.0")
 
+    implementation("com.formdev:flatlaf:3.6.1")
 
     antTask 'com.jetbrains.intellij.java:java-compiler-ant-tasks:203.7148.30'
 }

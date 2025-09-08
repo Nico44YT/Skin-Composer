@@ -1,4 +1,3 @@
-
 package nazario.skin_composer.util;
 
 import javafx.application.Platform;
@@ -21,8 +20,8 @@ public class FileHandler {
         try(InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(name)){
             return in;
         }catch (Exception e) {
-           e.printStackTrace();
-           return null;
+            e.printStackTrace();
+            return null;
         }
     }
 

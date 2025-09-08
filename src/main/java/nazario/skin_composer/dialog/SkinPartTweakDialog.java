@@ -1,87 +1,54 @@
 package nazario.skin_composer.dialog;
 
 import nazario.skin_composer.SkinComposer;
-import nazario.skin_composer.SkinPart;
+import nazario.skin_composer.skin.SkinPart;
 
 import javax.swing.*;
-import java.awt.event.*;
 
 public class SkinPartTweakDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
-    private JButton buttonCancel;
-    private JSlider colorShift;
-    private JSpinner xOffset;
-    private JSpinner yOffset;
-    private JSlider brightnessFactorSlider;
-    private JSlider opacifyFactorSlider;
-    private JSpinner spinner1;
-    private JSpinner spinner2;
-    private JSpinner spinner3;
+    private JSpinner xOffsetSpinner;
+    private JSpinner yOffsetSpinner;
+    private JCheckBox flipHorizontallyCheckBox;
+    private JCheckBox flipVerticallyCheckBox;
+    private JSlider hueSlider;
+    private JSpinner hueSpinner;
 
-    protected SkinPart tweakedPart;
+    private final SkinComposer composer;
+    private final SkinPart skinPart;
 
-    public SkinPartTweakDialog(SkinComposer skinComposer, SkinPart skinPart) {
+    public SkinPartTweakDialog(SkinComposer composer, SkinPart skinPart) {
+        this.composer = composer;
+        this.skinPart = skinPart;
+
         this.setContentPane(contentPane);
         this.setModal(true);
         this.getRootPane().setDefaultButton(buttonOK);
 
-        this.tweakedPart = skinPart;
-
-        buttonOK.addActionListener(lis -> onOK());
-        buttonCancel.addActionListener(lis -> onCancel());
-
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        colorShift.addChangeListener(lis -> {
-            double value = colorShift.getValue();
-            this.tweakedPart.hueShift = value;
-
-            skinComposer.updateSkinViewer();
-        });
-
-        xOffset.addChangeListener(lis -> {
-            this.tweakedPart.offsetX = (int)xOffset.getValue();
-
-            skinComposer.updateSkinViewer();
-        });
-
-        yOffset.addChangeListener(lis -> {
-            this.tweakedPart.offsetY = (int)yOffset.getValue()*-1;
-
-            skinComposer.updateSkinViewer();
-        });
-
-        opacifyFactorSlider.addChangeListener(lis -> {
-            this.tweakedPart.opacityFactor = opacifyFactorSlider.getValue()/100d;
-
-            skinComposer.updateSkinViewer();
-        });
-
-        brightnessFactorSlider.addChangeListener(lis -> {
-            this.tweakedPart.brightnessFactor = brightnessFactorSlider.getValue()/100d;
-        });
-
         this.pack();
+
+        this.flipHorizontallyCheckBox.addChangeListener(event -> updateSkinPart());
+        this.flipVerticallyCheckBox.addChangeListener(event -> updateSkinPart());
+        this.xOffsetSpinner.addChangeListener(event -> updateSkinPart());
+        this.yOffsetSpinner.addChangeListener(event -> updateSkinPart());
+
+        this.hueSpinner.addChangeListener(event -> {
+            this.hueSlider.setValue((int)this.hueSpinner.getValue());
+            updateSkinPart();
+        });
+        this.hueSlider.addChangeListener(event -> {
+            this.hueSpinner.setValue(this.hueSlider.getValue());
+            updateSkinPart();
+        });
     }
 
-    private void onOK() {
-        dispose();
-    }
+    protected void updateSkinPart() {
+        skinPart.flip(this.flipHorizontallyCheckBox.isSelected(), this.flipVerticallyCheckBox.isSelected());
+        skinPart.setOffset((Integer) this.xOffsetSpinner.getValue(), (Integer) this.yOffsetSpinner.getValue() * -1);
 
-    private void onCancel() {
-        dispose();
+        skinPart.setProperties(this.hueSlider.getValue()/100d, 1, 1, 1);
+
+        composer.updateSkin();
     }
 }

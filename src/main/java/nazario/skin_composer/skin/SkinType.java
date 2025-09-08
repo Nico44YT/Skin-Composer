@@ -1,4 +1,4 @@
-package nazario.skin_composer;
+package nazario.skin_composer.skin;
 
 public enum SkinType {
     SLIM("./models/player_slim.obj"),

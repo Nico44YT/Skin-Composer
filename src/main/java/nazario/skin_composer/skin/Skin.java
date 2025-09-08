@@ -1,4 +1,4 @@
-package nazario.skin_composer;
+package nazario.skin_composer.skin;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
@@ -6,19 +6,21 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompoundSkinImage {
+public class Skin {
+    protected final List<SkinPart> SKIN_PARTS;
 
-    public List<SkinPart> images;
-
-    public CompoundSkinImage(List<File> images) {
-        this.images = new ArrayList<>(images.stream().map(SkinPart::new).toList());
+    public Skin() {
+        this.SKIN_PARTS = new ArrayList<>();
     }
 
-    public BufferedImage asBufferedImage() {
+    public List<SkinPart> getSkinParts() {
+        return this.SKIN_PARTS;
+    }
+
+    public BufferedImage toBufferedImage() {
         Image image = toImage();
         int width = (int)image.getWidth();
         int height = (int)image.getHeight();
@@ -48,7 +50,7 @@ public class CompoundSkinImage {
 
         // Preload images once
         List<Image> loadedImages = new ArrayList<>();
-        for (SkinPart skinPart : this.images) {
+        for (SkinPart skinPart : this.getSkinParts()) {
             loadedImages.add(skinPart.createImage());
         }
 
@@ -84,13 +86,5 @@ public class CompoundSkinImage {
         double a = alpha + background.getOpacity() * invAlpha;
 
         return new Color(r, g, b, a);
-    }
-
-    public void remove(int index) {
-        this.images.remove(index);
-    }
-
-    public int size() {
-        return this.images.size();
     }
 }

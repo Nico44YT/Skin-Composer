@@ -1,10 +1,13 @@
 package nazario.skin_composer;
 
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import nazario.skin_composer.skin.AvailableSkinParts;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.Arrays;
 
@@ -13,6 +16,11 @@ public class Launcher {
 
     public static void main(String[] args) {
         SkinComposer composer = new SkinComposer("Skin Composer");
+
+        try{
+            UIManager.setLookAndFeel(FlatDarkLaf.class.getName());
+            SwingUtilities.updateComponentTreeUI(composer);
+        }catch (Exception e) {}
 
         composer.setVisible(true);
 
@@ -25,7 +33,7 @@ public class Launcher {
     }
 
     protected static void loadAllParts(SkinComposer composer, File partsFolder) throws IOException {
-        composer.PART_ENTRIES.clear();
+        composer.getAvailableSkinParts().clear();
 
         File partsConfig = new File(partsFolder, "parts.json");
 
@@ -49,7 +57,7 @@ public class Launcher {
             loadParts(composer, jsonObject, new File(partsFolder, id));
         });
 
-        composer.updateTabbedPane();
+        SwingUtilities.invokeLater(composer::updateAvailableSkinPartsTabs);
     }
 
     protected static void loadParts(SkinComposer composer, JsonObject object, File partsFolder) {
@@ -57,7 +65,7 @@ public class Launcher {
 
         partsFolder.mkdirs();
 
-        composer.PART_ENTRIES.add(new SkinPartListEntry(
+        composer.getAvailableSkinParts().add(new AvailableSkinParts(
                 object.get("name").getAsString(),
                 object.get("id").getAsString(),
                 object.get("icon").getAsString(),

@@ -1,190 +1,148 @@
 package nazario.skin_composer;
 
-import javafx.scene.control.Skin;
-import nazario.skin_composer.components.PickedSkinEntryComponent;
-import nazario.skin_composer.components.SkinPartViewerComponent;
-import nazario.skin_composer.components.SkinViewerComponent;
-import nazario.skin_composer.util.FileHandler;
+import nazario.skin_composer.skin.*;
+import nazario.skin_composer.skin.viewer.MovableSkinViewerComponent;
+import nazario.skin_composer.skin.viewer.SkinPartViewerComponent;
+import nazario.skin_composer.skin.viewer.SkinViewerComponent;
+import org.controlsfx.control.spreadsheet.Grid;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SkinComposer extends JFrame {
     private JPanel mainPanel;
-    private JPanel selectedParts;
-    private JPanel availableParts;
-    private JPanel skinView;
-    private JTabbedPane partsTabbedPane;
-    private JButton exportButton;
-    private JButton saveButton;
-    private JButton exportAsAseprite;
-    private JButton loadButton;
-    public JPanel selectedPartsPanel;
-    private JScrollPane scrollPanePickedParts;
+    private JPanel skinViewPanel;
+    private JTabbedPane availablePartsTabs;
+    private JPanel pickedPartsPanel;
+    private JPanel firstHalf;
+    private JScrollPane pickedPartsScrollPane;
+    private JButton button1;
 
-    protected SkinViewerComponent skinViewerComponent;
+    protected SkinViewerComponent skinViewer;
 
-    public List<SkinPartListEntry> PART_ENTRIES;
-    private SkinType skinType;
+    protected final List<AddedSkinPartComponent> ADDED_PARTS;
+    protected final List<AvailableSkinParts> AVAILABLE_SKIN_PARTS;
 
-    public CompoundSkinImage currentSkin;
-
-    public SkinComposer(String titleName) {
-        super(titleName);
-        this.setContentPane(this.mainPanel);
-        this.setMinimumSize(new Dimension(512 + 256, 512));
+    public SkinComposer(String windowTitle) {
+        super(windowTitle);
+        this.setMinimumSize(new Dimension(1024 + 512, 512 + 256));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
 
-        this.skinViewerComponent = new SkinViewerComponent(this, (int)this.getMinimumSize().getWidth()/3, (int)this.getMinimumSize().getHeight());
+        this.setContentPane(this.mainPanel);
 
-        this.getContentPane().setLayout(new GridLayout(1, 3));
-        this.selectedParts.setMinimumSize(new Dimension((int)this.getMinimumSize().getWidth()/3, (int)this.getMinimumSize().getHeight()));
-        this.getContentPane().add(this.selectedParts);
+        this.skinViewPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.getHeight()));
 
-        this.skinView.setMinimumSize(new Dimension((int)this.getMinimumSize().getWidth()/3, (int)this.getMinimumSize().getHeight()));
-        this.getContentPane().add(this.skinView);
 
-        this.availableParts.setMinimumSize(new Dimension((int)this.getMinimumSize().getWidth()/3, (int)this.getMinimumSize().getHeight()));
-        this.getContentPane().add(this.availableParts);
+        this.skinViewer = new MovableSkinViewerComponent(this, new Skin(),this.getWidth()/3, this.getHeight());
+        this.AVAILABLE_SKIN_PARTS = new ArrayList<>();
+        this.ADDED_PARTS = new ArrayList<>();
 
-        this.skinView.setLayout(new BorderLayout());
-        this.skinView.add(skinViewerComponent, BorderLayout.CENTER);
+        this.skinViewPanel.setLayout(new BorderLayout());
+        this.skinViewPanel.add(skinViewer, BorderLayout.CENTER);
 
-        this.skinType = SkinType.DEFAULT;
-        this.PART_ENTRIES = new ArrayList<>();
+        this.firstHalf.setLayout(new GridLayout(1, 2));
+        this.pickedPartsPanel.setLayout(new BoxLayout(this.pickedPartsPanel, BoxLayout.Y_AXIS));
+        this.pickedPartsScrollPane.setPreferredSize(new Dimension(96*2 + 70, this.getHeight()));
+        this.pickedPartsScrollPane.setMaximumSize(new Dimension(96*2 + 70, this.getHeight()));
 
-        this.scrollPanePickedParts.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.mainPanel.setLayout(new GridLayout(1, 3));
+        this.mainPanel.add(this.firstHalf);
+        this.mainPanel.add(this.skinViewPanel);
+        this.mainPanel.add(this.availablePartsTabs);
+    }
 
-        this.currentSkin = new CompoundSkinImage(new ArrayList<>());
+    public List<AvailableSkinParts> getAvailableSkinParts() {
+        return this.AVAILABLE_SKIN_PARTS;
+    }
 
-        this.addComponentListener(new ComponentListener() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if(currentSkin != null) {
-                    updateSkinViewer();
-                }
+    public void updateAvailableSkinPartsTabs() {
+        AVAILABLE_SKIN_PARTS.forEach(group -> {
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4));
+            panel.setPreferredSize(new Dimension(300, group.imageFiles().length * 70));
+
+            for(File file : group.imageFiles()) {
+                int size = 96;
+                SkinPartViewerComponent partViewer = new SkinPartViewerComponent(this, new SkinPart(file), size, size);
+                partViewer.setMinimumSize(new Dimension(size, size));
+                partViewer.setPreferredSize(new Dimension(size, size));
+
+                partViewer.addActionListener(lis -> {
+                    this.skinViewer.getSkin().getSkinParts().add(new SkinPart(file));
+                    updateSkin();
+                    updatePickedList();
+                });
+
+                panel.add(partViewer);
             }
-            //region
-            @Override
-            public void componentMoved(ComponentEvent e) {
 
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentHidden(ComponentEvent e) {
-
-            }
-            //endregion
+            JScrollPane scrollPane = new JScrollPane(panel);
+            availablePartsTabs.add(group.name(), scrollPane);
         });
-
-
-        this.exportButton.addActionListener(this::action$exportSkin);
-    }
-
-    public SkinType getSkinType() {
-        if(this.skinView == null) return SkinType.DEFAULT;
-        return this.skinType;
-    }
-
-    public void updateTabbedPane() {
-        this.PART_ENTRIES.forEach(entry -> {
-            File[] parts = entry.files();
-            JPanel holder = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 4)); // left aligned, 4px gaps
-            holder.setPreferredSize(new Dimension(300, parts.length * 70));
-
-            for (File file : parts) {
-                SkinPartViewerComponent skinPartComponent = getPartViewerComponent(file);
-
-                holder.add(skinPartComponent);
-            }
-
-            JScrollPane scrollPane = new JScrollPane(holder, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            this.partsTabbedPane.add(entry.name(), scrollPane);
-        });
-    }
-
-    private SkinPartViewerComponent getPartViewerComponent(File file) {
-        SkinPartViewerComponent skinPartComponent = new SkinPartViewerComponent(new SkinPart(file), this, 96, 96);
-
-        skinPartComponent.addActionListener(lis -> {
-            currentSkin.images.add(new SkinPart(file));
-
-            updateSkinViewer();
-        });
-
-        skinPartComponent.setMinimumSize(new Dimension(96, 96));
-        skinPartComponent.setPreferredSize(new Dimension(96, 96));
-        skinPartComponent.setSize(new Dimension(96, 96));
-        return skinPartComponent;
-    }
-
-    List<PickedSkinEntryComponent> PICKED_PARTS = new ArrayList<>();
-
-    public void smartUpdateSkinViewer() {
-        this.selectedPartsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-        for (int i = 0; i < PICKED_PARTS.size(); i++) {
-            PickedSkinEntryComponent part = PICKED_PARTS.get(i);
-
-            boolean containsInCompoundSkin = this.currentSkin.images.contains(part.getSkinPart());
-            if(!containsInCompoundSkin) {
-                this.selectedPartsPanel.remove(part);
-            } else {
-                boolean containedInList = part.getParent() == this.selectedPartsPanel;
-                if(!containedInList) {
-                    this.selectedPartsPanel.add(new PickedSkinEntryComponent(this, part.getSkinPart(), i, this.getWidth()/3 - 35));
-                }
-            }
-
-        }
-
-        this.skinViewerComponent.updateTexture(this.currentSkin.toImage());
 
         repaint();
     }
 
-    public void updateSkinViewer() {
-        //this.selectedPartsPanel.removeAll();
-        //this.selectedPartsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-//
-        //this.selectedPartsPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.currentSkin.images.size() * 70));
-//
-        //for (int i = 0; i < this.currentSkin.images.size(); i++) {
-        //    this.selectedPartsPanel.add(new PickedSkinEntryComponent(this, this.currentSkin.images.get(i), i, this.getWidth()/3 - 35));
-        //}
-//
-        //this.skinViewerComponent.updateTexture(this.currentSkin.toImage());
-//
-//
-        //repaint();
-
-        smartUpdateSkinViewer();
+    public void updateSkin() {
+        this.skinViewer.updateTexture(this.skinViewer.getSkin().toImage());
     }
 
-    private void action$exportSkin(ActionEvent event) {
-        File saveLocation = FileHandler.saveFileChooser("Save Skin");
+    private void updatePickedList() {
+        Skin skin = this.getSkinViewer().getSkin();
+        List<SkinPart> parts = skin.getSkinParts();
 
-        saveLocation.mkdirs();
-
-        try {
-            BufferedImage bi = this.currentSkin.asBufferedImage();
-            ImageIO.write(bi, "png", saveLocation);
-        }catch (Exception e){
-            e.printStackTrace();
+        // Ensure ADDED_PARTS list has the correct size
+        while (this.ADDED_PARTS.size() < parts.size()) {
+            this.ADDED_PARTS.add(null);
         }
+
+        for (int i = 0; i < parts.size(); i++) {
+            SkinPart part = parts.get(i);
+
+            AddedSkinPartComponent existing = this.ADDED_PARTS.get(i);
+            if (existing == null) {
+                // No component yet → create new
+                this.ADDED_PARTS.set(i, new AddedSkinPartComponent(this, part, i));
+            } else {
+                // Component exists → update only the skin part if it changed
+                if (!existing.getSkinPart().equals(part)) {
+                    existing.setSkinPart(part); // <- you need a setter in AddedSkinPartComponent
+                }
+            }
+        }
+
+        // Rebuild the panel only once
+        this.pickedPartsPanel.removeAll();
+        for (int i = 0; i < this.ADDED_PARTS.size(); i++) {
+            AddedSkinPartComponent component = this.ADDED_PARTS.get(i);
+            if (component != null) {
+                this.pickedPartsPanel.add(component);
+                component.setMinimumSize(new Dimension(96*2, 96));
+                component.setPreferredSize(new Dimension(96*2, 96));
+                component.updateButtons(this, i);
+            }
+        }
+
+        this.pickedPartsPanel.revalidate();
+        this.pickedPartsPanel.repaint();
+    }
+
+    public SkinType getSkinType() {
+        return SkinType.DEFAULT;
+    }
+
+    public SkinViewerComponent getSkinViewer() {
+        return this.skinViewer;
+    }
+
+    public List<AddedSkinPartComponent> getAddedPartComponents() {
+        return this.ADDED_PARTS;
+    }
+
+    public void updateAddedParts() {
+        this.updatePickedList();
     }
 }
