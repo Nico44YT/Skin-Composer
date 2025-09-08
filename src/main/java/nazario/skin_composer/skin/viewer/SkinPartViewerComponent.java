@@ -1,6 +1,5 @@
 package nazario.skin_composer.skin.viewer;
 
-import com.google.errorprone.annotations.DoNotCall;
 import javafx.embed.swing.JFXPanel;
 import nazario.skin_composer.SkinComposer;
 import nazario.skin_composer.skin.Skin;

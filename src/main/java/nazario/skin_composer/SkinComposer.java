@@ -69,7 +69,7 @@ public class SkinComposer extends JFrame {
             panel.setPreferredSize(new Dimension(300, group.imageFiles().length * 70));
 
             for(File file : group.imageFiles()) {
-                int size = 96;
+                int size = 120;
                 SkinPartViewerComponent partViewer = new SkinPartViewerComponent(this, new SkinPart(file), size, size);
                 partViewer.setMinimumSize(new Dimension(size, size));
                 partViewer.setPreferredSize(new Dimension(size, size));
