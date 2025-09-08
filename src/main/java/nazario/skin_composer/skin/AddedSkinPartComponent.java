@@ -1,5 +1,6 @@
 package nazario.skin_composer.skin;
 
+import nazario.skin_composer.Icons;
 import nazario.skin_composer.SkinComposer;
 import nazario.skin_composer.dialog.SkinPartTweakDialog;
 import nazario.skin_composer.skin.viewer.SkinPartViewerComponent;
@@ -31,15 +32,25 @@ public class AddedSkinPartComponent extends JPanel {
         this.setOpaque(true);
 
         this.setBorder(new EmptyBorder(5, 5, 5, 5));
-        this.setMaximumSize(new Dimension(96*2 + 35, 96));
+        this.setMaximumSize(new Dimension(96*2 + 35, 100));
 
         this.skinPart = skinPart;
         this.index = index;
 
-        this.moveUpButton = new JButton("Up");
-        this.moveDownButton = new JButton("Down");
-        this.removeButton = new JButton("Remove");
-        this.openTweakDialogButton = new JButton("Tweak");
+        this.moveUpButton = new JButton();
+        this.moveDownButton = new JButton();
+        this.removeButton = new JButton();
+        this.openTweakDialogButton = new JButton();
+
+        this.moveUpButton.setIcon(Icons.UP);
+        this.moveDownButton.setIcon(Icons.DOWN);
+        this.removeButton.setIcon(Icons.REMOVE);
+        this.openTweakDialogButton.setIcon(Icons.TWEAK);
+
+        this.moveUpButton.setPreferredSize(new Dimension(90, 96/4));
+        this.moveDownButton.setPreferredSize(new Dimension(90, 96/4));
+        this.removeButton.setPreferredSize(new Dimension(90, 96/4));
+        this.openTweakDialogButton.setPreferredSize(new Dimension(90, 96/4));
 
         this.moveUpButton.addActionListener(event -> move(composer, index, -1));
         this.moveDownButton.addActionListener(event -> move(composer, index, 1));
@@ -74,6 +85,8 @@ public class AddedSkinPartComponent extends JPanel {
         parts.remove(this.skinPart);
         parts.add(newIndex, this.skinPart);
 
+        this.setSkinPart(this.skinPart);
+
         updateButtons(composer, newIndex);
         composer.updateAddedParts();
         composer.updateSkin();
@@ -85,6 +98,7 @@ public class AddedSkinPartComponent extends JPanel {
     }
 
     public SkinPart getSkinPart() {
+        if(!this.partViewer.getSkinPart().equals(this.skinPart)) this.partViewer.setTexture(this.skinPart.createImage());
         return this.skinPart;
     }
 

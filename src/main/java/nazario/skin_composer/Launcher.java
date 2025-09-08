@@ -86,7 +86,7 @@ public class Launcher {
 
             partJsonConfigEntry.addProperty("id", defaultPart.toLowerCase());
             partJsonConfigEntry.addProperty("name", defaultPart);
-            partJsonConfigEntry.addProperty("icon", "none");
+            partJsonConfigEntry.addProperty("icons", "none");
             parentJson.add(partJsonConfigEntry);
         }
 

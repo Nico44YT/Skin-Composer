@@ -142,4 +142,8 @@ public class SkinPart {
     public double getOpacityFactor() {
         return opacityFactor;
     }
+
+    public SkinPart copy() {
+        return new SkinPart(this.image, offsetX, offsetY, flipHorizontal, flipVertical, hueSift, saturationFactor, brightnessFactor, opacityFactor);
+    }
 }
