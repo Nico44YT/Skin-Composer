@@ -4,16 +4,19 @@ import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import nazario.skin_composer.util.FileHandler;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Skin {
+    public static final Supplier<Skin> DEFAULT = () -> new Skin(new SkinPart(FileHandler.getResourceAsFile("./textures/default_wide.png")));
     protected final List<SkinPart> SKIN_PARTS;
 
-    public Skin() {
-        this.SKIN_PARTS = new ArrayList<>();
+    public Skin(SkinPart... skinPart) {
+        this.SKIN_PARTS = new ArrayList<>(List.of(skinPart));
     }
 
     public List<SkinPart> getSkinParts() {

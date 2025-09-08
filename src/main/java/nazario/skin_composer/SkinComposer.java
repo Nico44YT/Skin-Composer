@@ -4,10 +4,13 @@ import nazario.skin_composer.skin.*;
 import nazario.skin_composer.skin.viewer.MovableSkinViewerComponent;
 import nazario.skin_composer.skin.viewer.SkinPartViewerComponent;
 import nazario.skin_composer.skin.viewer.SkinViewerComponent;
-import org.controlsfx.control.spreadsheet.Grid;
+import nazario.skin_composer.util.FileHandler;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +22,7 @@ public class SkinComposer extends JFrame {
     private JPanel pickedPartsPanel;
     private JPanel firstHalf;
     private JScrollPane pickedPartsScrollPane;
-    private JButton button1;
+    private JButton exportButton;
 
     protected SkinViewerComponent skinViewer;
 
@@ -36,6 +39,7 @@ public class SkinComposer extends JFrame {
 
         this.skinViewPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.getHeight()));
 
+        this.exportButton.addActionListener(this::action$exportSkin);
 
         this.skinViewer = new MovableSkinViewerComponent(this, new Skin(),this.getWidth()/3, this.getHeight());
         this.AVAILABLE_SKIN_PARTS = new ArrayList<>();
@@ -144,5 +148,19 @@ public class SkinComposer extends JFrame {
 
     public void updateAddedParts() {
         this.updatePickedList();
+    }
+
+
+    private void action$exportSkin(ActionEvent event) {
+        File saveLocation = FileHandler.saveFileChooser("Save Skin");
+
+        saveLocation.mkdirs();
+
+        try {
+            BufferedImage bi = this.getSkinViewer().getSkin().toBufferedImage();
+            ImageIO.write(bi, "png", saveLocation);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

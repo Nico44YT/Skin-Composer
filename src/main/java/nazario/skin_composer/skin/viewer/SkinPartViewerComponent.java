@@ -18,22 +18,18 @@ public class SkinPartViewerComponent extends SkinViewerComponent {
     protected SkinPart skinPart;
 
     public SkinPartViewerComponent(SkinComposer composer, SkinPart skinPart, int width, int height) {
-        super(composer, null, width, height);
+        super(composer, Skin.DEFAULT.get(), width, height);
 
         this.skinPart = skinPart;
+        this.getSkin().getSkinParts().add(skinPart);
     }
 
     @Override
     protected void initFx() {
         super.initFx();
 
-        this.updateTexture(skinPart.createImage());
+        this.updateTexture(this.getSkin().toImage());
         this.setupInputListeners(jfxPanel);
-    }
-
-    @DoNotCall
-    public Skin getSkin() {
-        return null;
     }
 
     public SkinPart getSkinPart() {
