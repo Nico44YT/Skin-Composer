@@ -12,6 +12,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FileHandler {
+    public static final FileChooser.ExtensionFilter JSON_FILTER = new FileChooser.ExtensionFilter("Json Files", ".json");
+    public static final File skinComposerData = new File(System.getProperty("user.home"), "\\AppData\\Local\\Nazario\\Skin Composer\\Parts");
+
+    public static String toRelativePath(String url) {
+        return url.replace(skinComposerData.getAbsolutePath(), "");
+    }
+
     public static File getResourceAsFile(String name) {
         return new File(ClassLoader.getSystemClassLoader().getResource(name).getPath());
     }
@@ -69,7 +76,7 @@ public class FileHandler {
         Platform.runLater(() -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(title);
-            fileChooser.getExtensionFilters().add(extension);
+            if(extension != null) fileChooser.getExtensionFilters().add(extension);
 
             // Show the FileChooser dialog
             result.set(fileChooser.showOpenDialog(new FakeStage()));

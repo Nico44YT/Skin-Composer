@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import nazario.skin_composer.skin.AvailableSkinParts;
+import nazario.skin_composer.util.FileHandler;
 
 import javax.swing.*;
 import java.io.*;
@@ -25,8 +26,7 @@ public class Launcher {
         composer.setVisible(true);
 
         try{
-            File skinComposerData = new File(System.getProperty("user.home"), "\\AppData\\Local\\Nazario\\Skin Composer\\Parts");
-            loadAllParts(composer, skinComposerData);
+            loadAllParts(composer, FileHandler.skinComposerData);
         }catch (Exception e){
             e.printStackTrace();
         }

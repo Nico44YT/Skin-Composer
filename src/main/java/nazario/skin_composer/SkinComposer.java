@@ -1,5 +1,10 @@
 package nazario.skin_composer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import javafx.stage.FileChooser;
 import nazario.skin_composer.skin.*;
 import nazario.skin_composer.skin.viewer.MovableSkinViewerComponent;
 import nazario.skin_composer.skin.viewer.SkinPartViewerComponent;
@@ -12,6 +17,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +30,9 @@ public class SkinComposer extends JFrame {
     private JPanel firstHalf;
     private JScrollPane pickedPartsScrollPane;
     private JButton exportButton;
+    private JButton saveButton;
+    private JButton loadButton;
+    private JButton clearButton;
 
     protected SkinViewerComponent skinViewer;
 
@@ -40,6 +50,9 @@ public class SkinComposer extends JFrame {
         this.skinViewPanel.setPreferredSize(new Dimension(this.getWidth()/3, this.getHeight()));
 
         this.exportButton.addActionListener(this::action$exportSkin);
+        this.saveButton.addActionListener(this::action$saveSkin);
+        this.loadButton.addActionListener(this::action$loadSkin);
+        this.clearButton.addActionListener(this::action$clear);
 
         this.skinViewer = new MovableSkinViewerComponent(this, new Skin(),this.getWidth()/3, this.getHeight());
         this.AVAILABLE_SKIN_PARTS = new ArrayList<>();
@@ -162,5 +175,55 @@ public class SkinComposer extends JFrame {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    private void action$saveSkin(ActionEvent event) {
+        String path = FileHandler.saveFileChooser("Save Skin").getAbsolutePath();
+        if(!path.endsWith(".json")) path += ".json";
+        File location = new File(path);
+
+        if(location != null) {
+            JsonArray array = new JsonArray();
+
+            this.getSkinViewer().getSkin().getSkinParts().forEach(skinPart -> {
+                array.add(skinPart.toJson());
+            });
+
+            try (FileWriter writer = new FileWriter(location)) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                gson.toJson(array, writer);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void action$loadSkin(ActionEvent event) {
+        File location = FileHandler.openFileChooser("Load Skin", null);
+
+        if(location != null) {
+            try(FileReader reader = new FileReader(location)) {
+                Gson gson = new Gson();
+                JsonArray array = gson.fromJson(reader, JsonArray.class);
+
+                this.getSkinViewer().getSkin().getSkinParts().clear();
+                this.ADDED_PARTS.clear();
+                this.getSkinViewer().getSkin().getSkinParts().addAll(array.asList().stream().map(jsonElement -> SkinPart.fromJson((JsonObject)jsonElement)).toList());
+
+                this.updateSkin();
+                this.updatePickedList();
+            }catch (Exception e) {
+
+            }
+        }
+    }
+
+    private void action$clear(ActionEvent event) {
+        this.getSkinViewer().getSkin().getSkinParts().clear();
+        this.ADDED_PARTS.clear();
+
+        this.updateSkin();
+        this.updatePickedList();
     }
 }

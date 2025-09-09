@@ -1,10 +1,13 @@
 package nazario.skin_composer.skin;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import nazario.skin_composer.util.FileHandler;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -145,5 +148,46 @@ public class SkinPart {
 
     public SkinPart copy() {
         return new SkinPart(this.image, offsetX, offsetY, flipHorizontal, flipVertical, hueSift, saturationFactor, brightnessFactor, opacityFactor);
+    }
+
+    public JsonObject toJson() {
+        String relativePath = FileHandler.toRelativePath(this.image.getUrl());
+
+        JsonObject parentObject = new JsonObject();
+
+        parentObject.addProperty("image", relativePath);
+        parentObject.add("offset", integersToArray(offsetX, offsetY));
+        parentObject.add("flip", integersToArray(this.flipHorizontal ? 1 : 0, this.flipVertical ? 1 : 0));
+        parentObject.addProperty("hue", this.hueSift);
+        parentObject.addProperty("saturation", this.saturationFactor);
+        parentObject.addProperty("brightness", this.brightnessFactor);
+        parentObject.addProperty("opacity", this.opacityFactor);
+
+        return parentObject;
+    }
+
+    public static SkinPart fromJson(JsonObject jsonObject) {
+        JsonArray offsetArray = jsonObject.get("offset").getAsJsonArray();
+        JsonArray flipArray = jsonObject.get("flip").getAsJsonArray();
+
+        return new SkinPart(
+                new Image(new File(FileHandler.skinComposerData, jsonObject.get("image").getAsString()).getAbsolutePath()),
+                offsetArray.get(0).getAsInt(),
+                offsetArray.get(1).getAsInt(),
+                flipArray.get(0).getAsInt() == 1,
+                flipArray.get(1).getAsInt() == 1,
+                jsonObject.get("hue").getAsDouble(),
+                jsonObject.get("saturation").getAsDouble(),
+                jsonObject.get("brightness").getAsDouble(),
+                jsonObject.get("opacity").getAsDouble()
+                );
+    }
+
+    protected static JsonArray integersToArray(int... numbers) {
+        JsonArray array = new JsonArray();
+        for (int number : numbers) {
+            array.add(number);
+        }
+        return array;
     }
 }
