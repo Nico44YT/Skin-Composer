@@ -127,4 +127,9 @@ public class SkinViewerComponent extends JPanel {
     public Skin getSkin() {
         return this.skin;
     }
+
+    public void updateModel() {
+        this.jfxPanel.removeAll();
+        initFx();
+    }
 }

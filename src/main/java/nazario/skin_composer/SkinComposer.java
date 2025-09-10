@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import javafx.stage.FileChooser;
 import nazario.skin_composer.skin.*;
 import nazario.skin_composer.skin.viewer.MovableSkinViewerComponent;
 import nazario.skin_composer.skin.viewer.SkinPartViewerComponent;
@@ -33,6 +32,7 @@ public class SkinComposer extends JFrame {
     private JButton saveButton;
     private JButton loadButton;
     private JButton clearButton;
+    private JCheckBox slimPlayerModelCheckbox;
 
     protected SkinViewerComponent skinViewer;
 
@@ -53,6 +53,8 @@ public class SkinComposer extends JFrame {
         this.saveButton.addActionListener(this::action$saveSkin);
         this.loadButton.addActionListener(this::action$loadSkin);
         this.clearButton.addActionListener(this::action$clear);
+
+        this.slimPlayerModelCheckbox.addActionListener(lis -> this.updateSkinModel());
 
         this.skinViewer = new MovableSkinViewerComponent(this, new Skin(),this.getWidth()/3, this.getHeight());
         this.AVAILABLE_SKIN_PARTS = new ArrayList<>();
@@ -148,7 +150,7 @@ public class SkinComposer extends JFrame {
     }
 
     public SkinType getSkinType() {
-        return SkinType.DEFAULT;
+        return slimPlayerModelCheckbox.isSelected() ? SkinType.SLIM : SkinType.DEFAULT;
     }
 
     public SkinViewerComponent getSkinViewer() {
@@ -163,6 +165,9 @@ public class SkinComposer extends JFrame {
         this.updatePickedList();
     }
 
+    public void updateSkinModel() {
+        this.getSkinViewer().updateModel();
+    }
 
     private void action$exportSkin(ActionEvent event) {
         File saveLocation = FileHandler.saveFileChooser("Save Skin");
